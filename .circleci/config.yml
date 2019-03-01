@@ -1,0 +1,46 @@
+version: 2
+jobs:
+  build_with_gcc:
+    docker:
+      - image: ubuntu:bionic
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install System Requirements
+          command: apt update && apt upgrade -y && apt install build-essential -y && apt install cmake -y
+
+      - run:
+          name: Build Project
+          command: mkdir -p build && cd build && cmake .. && make -j$(nproc)
+
+      - run:
+          name: Smoke Test
+          command: ./build/src/helloworld-cpp
+
+  build_with_clang:
+    docker:
+      - image: ubuntu:bionic
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install System Requirements
+          command: apt update && apt upgrade -y && apt install build-essential -y && apt install cmake -y && apt install clang -y
+
+      - run:
+          name: Build Project
+          command: mkdir -p build && cd build && export CC=/usr/bin/clang && export CXX=/usr/bin/clang++ && cmake .. && make -j$(nproc)
+
+      - run:
+          name: Smoke Test
+          command: ./build/src/helloworld-cpp
+
+workflows:
+  version: 2
+  build_all:
+    jobs:
+      - build_with_gcc
+      - build_with_clang
